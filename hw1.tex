@@ -38,7 +38,7 @@ and check that your plot and caption are now in.
 
 \begin{figure}[H]
 \begin{center}
-\includegraphics[scale=0.5]{emptiness.pdf}
+\includegraphics[scale=0.5]{sigmoid.pdf}
 \caption{This is emptiness, it earns no points.}
 \end{center}
 \end{figure}
@@ -50,7 +50,11 @@ Fill in the first derivative and second derivative of sigmoid function in the hw
 
 The first derivative
 \[
-\frac{d f(z)}{dz} =  \answer.%here goes your derivative, but before the % character otherwise it will be commented out
+\frac{d f(z)}{dz} =  \frac{e^{-z}}{(1 + e^{-z})^2}.%here goes your derivative, but before the % character otherwise it will be commented out
+\]
+
+\[
+\frac{d^2 f(z)}{dz^2} = \frac{2 * e^{-2z}}{(1 + e^{-z})^3} - \frac{e^{-z}}{(1 + e^{-z})^2}
 \]
 
 You might have to consult an intro to \LaTeX in order to figure out how to format your math.
