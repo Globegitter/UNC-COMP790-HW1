@@ -1,7 +1,12 @@
 \documentclass{article}
 \include{hwdefs}
+\usepackage{listings}
 \setcounter{HW}{1}
 \begin{document}
+\lstset{language=Python}
+\lstset{basicstyle=\ttfamily}
+\lstset{tabsize=4}
+\lstset{columns=fullflexible}
 
 \author{Markus Padourek}
 \title{COMP  790-124, HW\theHW}
@@ -17,19 +22,20 @@
 \begin{enumerate}
 \item Plot the sigmoid function in MATLAB using script
 \begin{verbatim}
-z = [-5:0.1:5];
-fz = 1./(1 + exp(-z));
-plot(z,fz,'LineWidth',3);
-xlabel('z');ylabel('f(z)'); % we always label axes, yes we do!
-hwplotprep
-print -dpdf sigmoid.pdf
+z = np.arange(-5, 5, 0.1)
+fz = 1. / (1 + np.exp(-z))
+plt.plot(z, fz, linewidth=3)
+plt.xlabel('z')
+plt.ylabel('f(z)')  # we always label axes, yes we do!
+hwplotprep()
+plt.savefig('sigmoid.pdf')
 \end{verbatim}
 Find the resulting figure in file {\tt sigmoid.pdf}.
 b) In hw\theHW.tex, find the segment of the file that sets up the first figure -- it starts with {\tt \textbackslash begin\{figure\}} and ends with  {\tt \textbackslash end\{figure\}}.
 \item Inside this segment  replace {\tt emptiness.pdf} with {\tt sigmoid.pdf}.
 \item Change the text under {\tt \textbackslash caption} -- right now it says ``This is emptiness, it earns no points.'' -- to say what the figure is about.
 \item Remake hw\theHW.pdf by running in shell/command prompt
-
+z
      \texttt{pdflatex hw\theHW.tex}
 
 and check that your plot and caption are now in.
@@ -39,7 +45,7 @@ and check that your plot and caption are now in.
 \begin{figure}[H]
 \begin{center}
 \includegraphics[scale=0.5]{sigmoid.pdf}
-\caption{This is emptiness, it earns no points.}
+\caption{The Sigmoid function.}
 \end{center}
 \end{figure}
 
@@ -61,37 +67,40 @@ You might have to consult an intro to \LaTeX in order to figure out how to forma
 
 \newproblem{1pt}
 Write a MATLAB function that implements computation  of the first derivative of $f$ at a particular point. You just did the math for this.
-Here is a function that is {\em wrong}
-\begin{verbatim}
-function d = dsigmoid(z)
-% This function computes first derivative of sigmoid function at z
-d = ...
-end
-\end{verbatim}
+Here is a function that is {\em right}
+\begin{lstlisting}
+import numpy as np
+def dsigmoid(z):
+    d = np.exp(-z) / (1 + np.exp(-z)) ** 2
+    return d
+\end{lstlisting}
 Correct hw\theHW.tex by replacing {\tt ...} above with the correct MATLAB code to compute expression you obtained in previous problem.
 
-Crate a file {\tt dsigmoid.m} that {\em correctly} computes the first derivative.
+Crate a file {\tt dsigmoid.py} that {\em correctly} computes the first derivative.
 
 \newproblem{1pt}
 
-We will use your function {\tt dsigmoid.m} to plot the first derivative.
-\begin{verbatim}
-zs = [-5:0.01:5];
-for i = 1:length(zs)
-    ds(i) = dsigmoid(zs(i));
-end
-plot(zs,ds,'LineWidth',3);
-xlabel('z');ylabel('df(z)');
-hwplotprep
-print -dpdf dsigmoid.pdf
-\end{verbatim}
+We will use your function {\tt dsigmoid.py} to plot the first derivative.
+\begin{lstlisting}
+zs = np.arange(-5, 5, 0.01)
+ds = np.arange(zs.shape[0], dtype=np.float64)
+for i in range(zs.shape[0]):
+    ds[i] = dsigmoid(zs[i])
+
+
+plt.plot(zs, ds, linewidth=3)
+plt.xlabel('z')
+plt.ylabel('df(z)')
+hwplotprep()
+plt.savefig('dsigmoid.pdf')
+\end{lstlisting}
 
 Find the resulting plot in file {\tt dsigmoid.pdf}. In hw\theHW.tex replace {\tt emptiness.pdf} with {\tt dsigmoid.pdf} . Change the
 caption in the figure to say what the figure is about. Remake hw\theHW.pdf and check that your plot has made it in.
 \begin{figure}[H]
 \begin{center}
-\includegraphics[scale=0.5]{emptiness.pdf}
-\caption{This is the emptiness, it earns no points.}
+\includegraphics[scale=0.5]{dsigmoid.pdf}
+\caption{This is the first derivative of the Sigmoid function.}
 \end{center}
 \end{figure}
 
@@ -104,39 +113,40 @@ We can approximate derivatives numerically
 where the right-side of this approximate equality is called {\em finite difference} approximation. Unlike derivative definition we do not need $h$ to be infinitesimal, just a small value. The numerical approximation of a derivative is tremendously useful trick to check you derivative, gradients, Jacobians, Hessians etc. Make sure that you understand what it does.
 
 We will use this approximation to check your derivatives. Here is a function that computes approximately the derivatives of sigmoid
-\begin{verbatim}
-function d = fdsigmoid(z)
-f0 = 1/(1 + exp(-z));
-f1 = 1/(1 + exp(-(z + 1e-5)));
-d = (f1 - f0)/1e-5;
-end
-\end{verbatim}
-Save this function into a file names \texttt{fdsigmoid.m}.
+\begin{lstlisting}
+def fdsigmoid(z):
+    f0 = 1 / (1 + np.exp(-z))
+    f1 = 1 / (1 + np.exp(-(z + 1e-5)))
+    d = (f1 - f0) / 1e-5
+    return d
+\end{lstlisting}
+Save this function into a file names \texttt{fdsigmoid.py}.
 
-Try following code in MATLAB
-\begin{verbatim}
-zs = randn(100,1);
-for i=1:length(zs)
-    err(i) = dsigmoid(zs(i)) - fdsigmoid(zs(i));
-end
-hist(err,30)
-hwplotprep
-print -dpdf hist.pdf
-\end{verbatim}
+Try the following code
+\begin{lstlisting}
+zs = np.random.randn(100)
+err = np.empty(zs.shape[0])
+for i in range(zs.shape[0]):
+    err[i] = dsigmoid(zs[i]) - fdsigmoid(zs[i])
+plt.figure()
+plt.hist(err, 30)
+hwplotprep()
+plt.savefig('hist.pdf')
+\end{lstlisting}
 The code above samples 100 normally distributed values and computes the finite differences approximation and the derivative you derived and implemented and then plots histogram of errors.
 
 Find the resulting plot in file {\tt hist.pdf}. In hw\theHW.tex replace {\tt emptiness.pdf} with {\tt hist.pdf} . Change the
 caption in the figure to say what the figure is about. Remake hw\theHW.pdf and check that your plot has made it in.
 \begin{figure}[H]
 \begin{center}
-\includegraphics[scale=0.5]{emptiness.pdf}
-\caption{This is the emptiness, it earns no points.}
+\includegraphics[scale=0.5]{hist.pdf}
+\caption{Groups the error into 30 equal intervals and displays their frequency}
 \end{center}
 \end{figure}
 
 
 
-\begin{remark} The error ranges between \answer and \answer.
+\begin{remark} The errors ranges, roughly, between \( -5*10^{-7}\) and \(5*10^{-7}\) .
 \end{remark}
 
 \newproblem{1pt}
@@ -146,11 +156,11 @@ f(z+h) = f(z) + \frac{df(z)}{dz}h + \frac{1}{2}\frac{d^2f(z)}{d^2z}h^2 + O(h^3).
 \]
 Derive a bound on the error of the finite differences approximation using the above expression. You can use big O notation to express this bound.
 \[
-\textrm{Err}(z_0,h) = \abs{\frac{f(z_0+h) - f(z_0)}{h} - \frac{df(z_0)}{dz}} \leq \answer
+\textrm{Err}(z_0,h) = \abs{\frac{f(z_0+h) - f(z_0)}{h} - \frac{df(z_0)}{dz}} \leq O(h)
 \]
 
-Specifically for sigmoid function plug in appropriate derivative on the right hand side of the inequality. If $h=10^{-5}$ and $z_0 = 0$ the error of the finite difference should be about \answer.
-Does this agree with the histogram of error that is in the figure above?
+Specifically for sigmoid function plug in appropriate derivative on the right hand side of the inequality. If $h=10^{-5}$ and $z_0 = 0$ the error of the finite difference should be about \(9.464*10^{-12}\) .
+Does this agree with the histogram of error that is in the figure above? Yes.
 
 \newproblem{1pt}
 Let
@@ -159,7 +169,7 @@ f(z) = \frac{1}{1 + \myexp{-z}} = p
 \EEQ
 express $z$ in terms of $p$
 \[
-z = \answer.
+z = -\mylog{\frac{1-p}{p} }.
 \]
 Now suppose
 \BEQ\label{eq:qz}
@@ -167,15 +177,15 @@ Now suppose
 \EEQ
 and express $z$ in terms of $q$
 \[
-z = \answer.
+z = \mylog{\frac{1-q}{q} }.
 \]
 Given Eqs.\eqref{eq:pz},\eqref{eq:qz} express $q$ in terms of $p$
 \[
-q = \answer.
+q = 1-p.
 \]
 Express $f(-z)$ in terms of $f(z)$
 \[
-f(-z) = \answer.
+f(-z) = \frac{1}{1 + \myexp{z}}.
 \]
 Hint: the manipulations that are useful here are either subtraction from 1 (as in $1-x$), computing inverse (as in $\frac{1}{x}$), and taking logarithm (as in $\log(x)$).
 
@@ -187,7 +197,7 @@ g(z) = \mylog{ \frac{1}{1+ \myexp{-z}} }.
 \]
 Compute its derivative and fill it in here
 \[
-\frac{dg(z)}{dz} =  \answer.%here goes your derivative of log sigmoid, but before the % character otherwise it will be commented out
+\frac{dg(z)}{dz} =   \frac{\myexp{-z}}{1 + \myexp{-z}}.%here goes your derivative of log sigmoid, but before the % character otherwise it will be commented out
 \]
 Check your derivative by comparing its value to the finite difference approximation.
 
@@ -195,7 +205,7 @@ Check your derivative by comparing its value to the finite difference approximat
 \newproblem{1pt}
 Compute second derivative of $g(z)$
 \[
-\frac{dg(z)}{dz} =  \answer.%here goes your derivative of log sigmoid, but before the % character otherwise it will be commented out
+\frac{dg(z)}{dz} =  - \frac{\myexp{-z}}{(1 + \myexp{-z})^2}.%here goes your derivative of log sigmoid, but before the % character otherwise it will be commented out
 \]
 Check the second derivative by comparing its value to the finite difference of the {\em first} derivatives you computed above.
 
@@ -206,20 +216,22 @@ Let the dataset be specified by $\mathcal{D} = \left\{ (\xx_i,y_i):i=1,\dots,n \
 p(y | \xx_i,\beta_0,\beta) = \frac{1}{1 + \myexp{-y_i(\beta_0 + \bket{\beta}{\xx_i})}}
 \EEQ
 Write a matlab function that computes log probability of label $y$ given a vector of features $\xx$ and $\beta_0,\beta$.
-\begin{verbatim}
-function logP = logProbLogReg(y,X,beta0,beta)
-logP = log( .... )
-\end{verbatim}
+\begin{lstlisting}
+import numpy as np
+def logProbLogReg(self, y, x, beta0, beta):
+	logP = np.log(1 / (1 + np.exp(-y * (beta0 + np.dot(beta.T, x))))
+	return logP[0, 0]
+\end{lstlisting}
 Now write a matlab function that uses the above function to compute log probability of label $+1$ for a vector of features $\xx$ and $\beta_0,\beta$
-\begin{verbatim}
-function predY = predictY(X,beta0,beta)
-logProbY = logProgLogReg(X,1,beta0,beta);
-if logProbY > ...
-    predY = ...
-else
-    predY = ...
-end
-\end{verbatim}
+\begin{lstlisting}
+def predictY(	x, beta0, beta):
+	logProbY = logProbLogReg(1,X,beta0,beta);
+	if logProbY > np.log(0.5):
+		predY = 1
+	else:
+		predY = -1
+	return predY
+\end{lstlisting}
 
 
 \newproblem{1pt}
@@ -228,40 +240,46 @@ Given Eq.\eqref{eq:plr} we can write out log-likelihood
 \textrm{LL}(\beta_0,\beta;\mathcal{D}) = \sum_i \log \frac{1}{1 + \myexp{-y_i(\beta_0 + \bket{\beta}{\xx_i})}}.
 \EEQ
 Now using function $\texttt{logProbLogReg}$ that you obtained for the previous problem, write a matlab function that computes loglikelihood
-\begin{verbatim}
-function val = LogLikLogReg(y,X,beta0,beta)
-val = 0;
-for i=1:length(y)
-   val = val + ...
-end
-\end{verbatim}
+\begin{lstlisting}
+def LogLikLogReg(y, X, beta0, beta):
+	val = 0
+	for i in range(y.shape[1]):
+		val += logProbLogReg(y[i], x[i, :], beta0, beta)
+	return val
+\end{lstlisting}
 \newproblem{1pt}
 Write a function that computes gradient of log-likelihood of logistic regression Eq.\eqref{eq:ll}
-\begin{verbatim}
-function [dbeta0,dbeta] = dLogLikLogReg(y,X,beta0,beta)
-dbeta0 = ...
-for i=1:length(beta)
-    dbeta(i) = ...
-end
-\end{verbatim}
+\begin{lstlisting}
+def dLogLikLogReg(self, y, x, beta0, beta):
+	dbeta = np.mat(np.empty(beta.shape))
+	#Convert from arrays to matrices. 
+	#An internal thing that simplifies matrix multiplication
+	y = np.mat(y)
+	x = np.mat(x)
+	beta = np.mat(beta)
+	dbeta0 = (1 - 1 / (1 + np.exp(-y * (beta0 + beta.T * x)))).T * y
+	for i in range(beta.shape[0]):
+		dbeta[i, 0] = (1 - 1 / (1 + np.exp(-y * (beta0 + beta.T * x)))).T * y * x[i, :]
+	return np.asarray(dbeta0[0, 0]), np.asarray(dbeta)
+\end{lstlisting}
 You can make sure that your implementation is correct using the finite differences trick.
 \newproblem{1pt}
 Implement a gradient ascent algorithm for fitting logistic regression and paste it below.
-\begin{verbatim}
+\begin{lstlisting}
 function [beta0,beta] = fitLogReg(y,X)
 ...
-\end{verbatim}
+\end{lstlisting}
 Run it with fixed step size $s=10^{-5}$, for 2000 iterations, on data stored in \texttt{hw\theHW.mat}.
 Note that \texttt{load hw\theHW.mat} loads the $y$ and $X$ variables, on which you can run by issuing command
 \texttt{[beta0,beta] = fitLogReg(y,X)}.
 Report resulting $\beta_0,\beta$
-\begin{verbatim}
+\begin{lstlisting}
 beta0 = ...
 beta0 = ...
-\end{verbatim}
+\end{lstlisting}
 \newproblem{1pt}
 Implement estimation of prediction error using cross validation
-\begin{verbatim}
+\begin{lstlisting}
 load hw1.mat
 rand('seed',1); K = 5; N = length(y);
 indices = crossvalind('Kfold',N,K);
@@ -280,6 +298,6 @@ for k=1:K
     end
 end
 cvErr = sum(err)/length(y);
-\end{verbatim}
+\end{lstlisting}
 Once done, run this on data stored in \texttt{hw\theHW.mat}. The cross-validation estimate of error on that dataset is \answer.
 \end{document}

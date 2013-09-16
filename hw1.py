@@ -10,8 +10,8 @@ def hwplotprep():
 
 def main():
     z = np.arange(-5, 5, 0.1)
-    #fz = 1/1
     fz = 1. / (1 + np.exp(-z))
+    plt.figure()
     plt.plot(z, fz, linewidth=3)
     plt.xlabel('z')
     plt.ylabel('f(z)')  # we always label axes, yes we do!
