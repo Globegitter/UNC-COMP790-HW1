@@ -28,33 +28,34 @@ class logProbability:
 
     def dLogLikLogReg(self, y, X, beta0, beta):
         dbeta = np.empty(beta.shape)
-        dbeta0 = sum((1 - 1 / (1 + np.exp(-y * (beta0 + np.dot(X, beta))))) * y)
+        dbeta0 = sum((1 - 1 / (1 + np.exp(-y * (beta0 + np.dot(X, beta))))) * y)[0]
         for p in range(beta.shape[0]):
             dbeta[p, 0] = sum((1 - 1 / (1 + np.exp(-y * (beta0 + np.dot(X, beta))))) * y * X[:, p][:, np.newaxis])
-        return dbeta0[0], dbeta
+        return dbeta0, dbeta
 
-#mat = sp.loadmat('hw1.mat')
-#y = np.random.randn(10, 1)
-#x = np.random.randn(10, 1)
-#beta0 = np.random.randn()
-#beta = np.random.randn(10, 1)
-#lP = logProbability()
-#print(lP.dLogLikLogReg(y, x, beta0, beta))
+if __name__ == "__main__":
+    mat = sp.loadmat('hw1.mat')
+    y = np.random.randn(10, 1)
+    x = np.random.randn(10, 1)
+    beta0 = np.random.randn()
+    beta = np.random.randn(10, 1)
+    lP = logProbability()
+    print(lP.dLogLikLogReg(y, x, beta0, beta))
 
-#print(mat['X'])
-#X = np.array(mat['X'])
-#y = np.array(mat['y'])
-#print(np.shape(y))
-#print(np.shape(X))
-#print(mat)
-#exit()
+    print(mat['X'])
+    X = np.array(mat['X'])
+    y = np.array(mat['y'])
+    print(np.shape(y))
+    print(np.shape(X))
+    print(mat)
+    exit()
 
-#for i in range(1000):
-#    lP = logProbability()
-#    x = np.random.randn(10, 1)
-#    beta0 = np.random.randn()
-#    beta = np.random.randn(10, 1)
-#    lP.predictY(x, beta0, beta)
-#    print('Solution: ')
-#    print(lP.predY)
-#    print(lP.logProbY)
+    for i in range(1000):
+        lP = logProbability()
+        x = np.random.randn(10, 1)
+        beta0 = np.random.randn()
+        beta = np.random.randn(10, 1)
+        lP.predictY(x, beta0, beta)
+        print('Solution: ')
+        print(lP.predY)
+        print(lP.logProbY)
