@@ -26,24 +26,20 @@ class logProbability:
             logLikelihood += self.logProbLogReg(y[i], x[i, :], beta0, beta)
         return logLikelihood
 
-    def dLogLikLogReg(self, y, x, beta0, beta):
-        dbeta = np.mat(np.empty(beta.shape))
-        #Convert from arrays to matrices. An internal thing that simplifies matrix multiplication
-        y = np.mat(y)
-        x = np.mat(x)
-        beta = np.mat(beta)
-        dbeta0 = (1 - 1 / (1 + np.exp(-y * (beta0 + beta.T * x)))).T * y
-        for i in range(beta.shape[0]):
-            dbeta[i, 0] = (1 - 1 / (1 + np.exp(-y * (beta0 + beta.T * x)))).T * y * x[i, :]
-        return np.asarray(dbeta0[0, 0]), np.asarray(dbeta)
+    def dLogLikLogReg(self, y, X, beta0, beta):
+        dbeta = np.empty(beta.shape)
+        dbeta0 = sum((1 - 1 / (1 + np.exp(-y * (beta0 + np.dot(X, beta))))) * y)
+        for p in range(beta.shape[0]):
+            dbeta[p, 0] = sum((1 - 1 / (1 + np.exp(-y * (beta0 + np.dot(X, beta))))) * y * X[:, p][:, np.newaxis])
+        return dbeta0[0], dbeta
 
-mat = sp.loadmat('hw1.mat')
-y = np.random.randn(10, 1)
-x = np.random.randn(10, 1)
-beta0 = np.random.randn()
-beta = np.random.randn(10, 1)
-lP = logProbability()
-print(lP.dLogLikLogReg(y, x, beta0, beta))
+#mat = sp.loadmat('hw1.mat')
+#y = np.random.randn(10, 1)
+#x = np.random.randn(10, 1)
+#beta0 = np.random.randn()
+#beta = np.random.randn(10, 1)
+#lP = logProbability()
+#print(lP.dLogLikLogReg(y, x, beta0, beta))
 
 #print(mat['X'])
 #X = np.array(mat['X'])
@@ -51,14 +47,14 @@ print(lP.dLogLikLogReg(y, x, beta0, beta))
 #print(np.shape(y))
 #print(np.shape(X))
 #print(mat)
-exit()
+#exit()
 
-for i in range(1000):
-    lP = logProbability()
-    x = np.random.randn(10, 1)
-    beta0 = np.random.randn()
-    beta = np.random.randn(10, 1)
-    lP.predictY(x, beta0, beta)
-    print('Solution: ')
-    print(lP.predY)
-    print(lP.logProbY)
+#for i in range(1000):
+#    lP = logProbability()
+#    x = np.random.randn(10, 1)
+#    beta0 = np.random.randn()
+#    beta = np.random.randn(10, 1)
+#    lP.predictY(x, beta0, beta)
+#    print('Solution: ')
+#    print(lP.predY)
+#    print(lP.logProbY)
