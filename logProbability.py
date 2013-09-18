@@ -6,12 +6,12 @@ import scipy.io as sp
 class logProbability:
     """A simple example class"""
 
-    def logProbLogReg(self, y, x, beta0, beta):
-        logP = np.log(1 / (1 + np.exp(-y * (beta0 + np.dot(beta.T, x)))))
+    def logProbLogReg(self, y, X, beta0, beta):
+        logP = np.log(1 / (1 + np.exp(-y * (beta0 + np.dot(X, beta)))))
         return logP[0, 0]
 
-    def predictY(self, x, beta0, beta):
-        self.logProbY = self.logProbLogReg(1, x, beta0, beta)
+    def predictY(self, X, beta0, beta):
+        self.logProbY = self.logProbLogReg(1, X, beta0, beta)
         #print('Log of 0.5 = ')
         #print(np.log(0.5))
         if self.logProbY > np.log(0.5):
@@ -20,10 +20,10 @@ class logProbability:
             self.predY = -1
         return self.predY
 
-    def LogLikLogReg(self, y, x, beta0, beta):
+    def LogLikLogReg(self, y, X, beta0, beta):
         logLikelihood = 0
         for i in range(y.shape[0]):
-            logLikelihood += self.logProbLogReg(y[i], x[i, :], beta0, beta)
+            logLikelihood += self.logProbLogReg(y[i], X[i, :], beta0, beta)
         return logLikelihood
 
     def dLogLikLogReg(self, y, X, beta0, beta):

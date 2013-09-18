@@ -218,13 +218,13 @@ p(y | \xx_i,\beta_0,\beta) = \frac{1}{1 + \myexp{-y_i(\beta_0 + \bket{\beta}{\xx
 Write a matlab function that computes log probability of label $y$ given a vector of features $\xx$ and $\beta_0,\beta$.
 \begin{lstlisting}
 import numpy as np
-def logProbLogReg(self, y, x, beta0, beta):
-	logP = np.log(1 / (1 + np.exp(-y * (beta0 + np.dot(beta.T, x))))
+def logProbLogReg(self, y, X, beta0, beta):
+	logP = np.log(1 / (1 + np.exp(-y * (beta0 + np.dot(X, beta))))
 	return logP[0, 0]
 \end{lstlisting}
 Now write a matlab function that uses the above function to compute log probability of label $+1$ for a vector of features $\xx$ and $\beta_0,\beta$
 \begin{lstlisting}
-def predictY(	x, beta0, beta):
+def predictY(X, beta0, beta):
 	logProbY = logProbLogReg(1,X,beta0,beta);
 	if logProbY > np.log(0.5):
 		predY = 1
@@ -244,16 +244,18 @@ Now using function $\texttt{logProbLogReg}$ that you obtained for the previous p
 def LogLikLogReg(y, X, beta0, beta):
 	val = 0
 	for i in range(y.shape[1]):
-		val += logProbLogReg(y[i], x[i, :], beta0, beta)
+		val += logProbLogReg(y[i], X[i, :], beta0, beta)
 	return val
 \end{lstlisting}
 \newproblem{1pt}
 Write a function that computes gradient of log-likelihood of logistic regression Eq.\eqref{eq:ll}
 \begin{lstlisting}
-dbeta = np.empty(beta.shape)
+def dLogLikLogReg(self, y, X, beta0, beta):
+	dbeta = np.empty(beta.shape)
 	dbeta0 = sum((1 - 1 / (1 + np.exp(-y * (beta0 + np.dot(X, beta))))) * y)[0]
 	for p in range(beta.shape[0]):
-		dbeta[p, 0] = sum((1 - 1 / (1 + np.exp(-y * (beta0 + np.dot(X, beta))))) * y * X[:, p][:, np.newaxis])
+		e = (1 - 1 / (1 + np.exp(-y * (beta0 + np.dot(X, beta))))) 
+		dbeta[p, 0] = sum(e * y * X[:, p][:, np.newaxis])
 	return dbeta0, dbeta
 \end{lstlisting}
 You can make sure that your implementation is correct using the finite differences trick.
@@ -348,24 +350,37 @@ beta = [ -7.94603664e-01   6.44421758e-01  -9.61391742e-01   1.06937019e+00
 \newproblem{1pt}
 Implement estimation of prediction error using cross validation
 \begin{lstlisting}
-load hw1.mat
-rand('seed',1); K = 5; N = length(y);
-indices = crossvalind('Kfold',N,K);
-for k=1:K
-    testX = x(:,indices == k);
-    testY = y(indices == k);
+from scipy.io import loadmat
+import numpy as np
+from sklearn.cross_validation import KFold
+from gradientAscent import GradientAscentLogReg
+from logProbability import *
 
-    trainX = x(:,indices ~= k);
-    trainY = y(indices ~= k);
 
-    [beta0,beta] = optimizeLogLikLogReg(trainX,trainY);
+mat = loadmat('hw1.mat')
+X = np.array(mat['X']).T
+y = np.array(mat['y']).T
+K = 5
+N = y.shape[0]
+err = np.zeros(K)
+k = 0
+ga = GradientAscentLogReg()
+lp = logProbability()
 
-    for i=1:length(testY)
-        predY = ...
-        err(k) = err(k) + ...
-    end
-end
-cvErr = sum(err)/length(y);
+np.random.seed(1)
+kf = KFold(N, n_folds=K)
+for trainIndex, testIndex in kf:
+	XTrain, XTest = X[trainIndex], X[testIndex]
+	yTrain, yTest = y[trainIndex], y[testIndex]
+
+	beta0, beta = ga.fitLogReg(yTrain, XTrain)
+
+	for i in range(yTest.shape[0]):
+		yPred = lp.predictY(XTest, beta0, beta)
+		err[k] += (np.abs(yPred - yTest[i]) / 2)
+	k += 1
+cvErr = np.sum(err) / y.shape[0]
+print(cvErr)
 \end{lstlisting}
-Once done, run this on data stored in \texttt{hw\theHW.mat}. The cross-validation estimate of error on that dataset is \answer.
+Once done, run this on data stored in \texttt{hw\theHW.mat}. The cross-validation estimate of error on that dataset is 0.2643.
 \end{document}

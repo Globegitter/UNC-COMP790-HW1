@@ -10,9 +10,9 @@ class GradientAscentLogReg:
     def fitLogReg(self, y, X):
         beta0 = 0
         beta = np.random.randn(X.shape[1], 1)
-        print('beta start')
-        print(beta)
-        print('--------')
+        #print('beta start')
+        #print(beta)
+        #print('--------')
         s = 1e-5
         i = 0
         MAXITER = 2000
